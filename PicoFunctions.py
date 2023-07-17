@@ -4,7 +4,6 @@ Created on Tue Feb 21 12:57:08 2023
 
 @author: jt16596
 """
-
 import os
 import imageio as iio
 from matplotlib import pyplot as plt
@@ -13,8 +12,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.animation as animation
 import random
-# import Tkinter
-# import tkMessageBox
+
 
 def readin(file,PicoList,Bin):
     pico=np.array(pd.read_csv(file))
@@ -28,11 +26,11 @@ def spectrum():
     Cr=data['Cr']/np.amax(data['Cr'])
     return Bin,Cr
 
-goal=18000
+goal=17500
 
 def noisefn(adc,Bin):
     s1=adc/65535
-    s2=s1*(np.tanh(0.01*(Bin-150))+1)+np.cos(2*np.pi*Bin/3.5)**2
+    s2=s1*(np.tanh(0.01*(Bin-150))+1)+np.cos(2*np.pi*Bin/3.5)**2+np.pi*(Bin+13)**-3.2+3*np.cos(Bin)**2
     return s2
 
 
@@ -54,16 +52,17 @@ def main(file):
     X,Y=[],[]
     ax[2].set_ylim(-100,100)
     ax[2].set_xlim(np.amin(PicoList[1]),np.amax(PicoList[1]))
-
-    # def restart():
-    #     root=Tkinter.Tk()
-    #     root.withdraw()
-    #     result=tkMessageBox.askyesno("Restart?","Would you like to restart animation?")
-    #     if result:
-    #         ani.frame_seq=ani.new_frame_seq()
-    #         ani.event_source.start()
-    #     else:
-    #         plt.close()
+    anim_running=True
+    def onClick(evn):
+        nonlocal anim_running
+        if anim_running:
+            ani.event_source.stop()
+            anim_running = False
+        else:
+            ani.event_source.start()
+            anim_running = True
+        
+    
     def animate(i):
         
         newy=(Mixed-PicoList[0][i])/PicoList[0][i]
@@ -80,17 +79,15 @@ def main(file):
         checkvar=np.abs(PicoList[1][i][0]-goal)
         if checkvar<=500:
             track.append(PicoList[1][i][0])
+
         try:
             ax[2].fill_between(track,-100,100,color='green')
-            for i in np.arange(0,len(track)):
-                ax[2].text(track[i], 80+10*(-1)**i,track[i])
         except:
             IndexError
-        # if i==len(PicoList[0]):
-        #     restart()
-        return line,diff,track
-    ani=animation.FuncAnimation(fig,animate,interval=20,save_count=0,frames=len(PicoList[1]),repeat=False)
 
+        return line,diff,track
+    fig.canvas.mpl_connect('button_press_event', onClick)
+    ani=animation.FuncAnimation(fig,animate,interval=30,save_count=0,frames=len(PicoList[1]),repeat=False)
     ax[0].plot(Bin,Cr,color='r',drawstyle='steps-post')
     ax[0].set_title('Desired Signal')
     ax[0].set_xlabel('Pulse Height (ADC counts)')
@@ -103,9 +100,8 @@ def main(file):
     ax[2].set_xlabel('Potentiometer voltage (ADC counts)')
     ax[2].set_title('Percentage difference between measured ADC and desired ADC')
     ax[2].set_ylim(-100,100)
-
+    
     plt.tight_layout()
     os.system('cls')
-    
 
     return ani
