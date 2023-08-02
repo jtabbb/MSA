@@ -81,13 +81,13 @@ def main(file):
             track.append(PicoList[1][i][0])
 
         try:
-            ax[2].fill_between(track,-100,100,color='green')
+            ax[2].fill_between(track,-310,110,color='green')
         except:
             IndexError
 
         return line,diff,track
     fig.canvas.mpl_connect('button_press_event', onClick)
-    ani=animation.FuncAnimation(fig,animate,interval=30,save_count=0,frames=len(PicoList[1]),repeat=False)
+    ani=animation.FuncAnimation(fig,animate,interval=300,save_count=0,frames=len(PicoList[1]),repeat=False)
     ax[0].plot(Bin,Cr,color='r',drawstyle='steps-post')
     ax[0].set_title('Desired Signal')
     ax[0].set_xlabel('Pulse Height (ADC counts)')
@@ -99,7 +99,7 @@ def main(file):
     ax[2].set_ylabel('Percentage difference ')
     ax[2].set_xlabel('Potentiometer voltage (ADC counts)')
     ax[2].set_title('Percentage difference between measured ADC and desired ADC')
-    ax[2].set_ylim(-100,100)
+    ax[2].set_ylim(-310,110)
     
     plt.tight_layout()
     os.system('cls')
