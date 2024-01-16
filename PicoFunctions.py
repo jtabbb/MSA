@@ -13,6 +13,9 @@ import pandas as pd
 import matplotlib.animation as animation
 import random
 
+import matplotlib
+matplotlib.use('TkAgg')
+
 
 def readin(file,PicoList,Bin):
     pico=np.array(pd.read_csv(file))
